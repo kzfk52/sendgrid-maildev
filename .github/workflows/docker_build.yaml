@@ -3,8 +3,8 @@ name: docker build
 # 1. Trigger
 on:
   push:
-    branches:
-      - workflow_test
+    #branches:
+    #  - workflow_test
     tags:
       - "v*.*.*"
 
@@ -16,15 +16,14 @@ jobs:
   docker:
     runs-on: ubuntu-20.04
     if: ${{ false }}
-    env:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
       # 2. setup variables
       - uses: FranzDiebold/github-env-vars-action@v2
       - name: Get current date
         id: date
         run: echo "::set-output name=today::$(date +'%Y%m%d')"
+      - name: aaa
+        run: echo
       # 3. Checkout code
       - name: Checkout
         uses: actions/checkout@v2
@@ -47,6 +46,11 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_HUB_IMAGE_NAME }}
       # 6. Build and Push
       - name: Build and push
         id: docker_build
@@ -56,6 +60,7 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
+          labels: ${{ steps.meta.outputs.labels }}
           # 7. nameing
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_HUB_IMAGE_NAME }}:${{ steps.date.outputs.today }}
@@ -90,7 +95,6 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ${{ env.GITHUB_REGISTRY }}/${{ env.GITHUB_IMAGE_NAME }}
-
       # 5. setup buildx
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -104,3 +108,21 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+      # 6. Build and Push
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          labels: ${{ steps.meta.outputs.labels }}
+          # 7. nameing
+          tags: |
+            ${{ env.GITHUB_REGISTRY }}/${{ env.GITHUB_IMAGE_NAME }}:${{ steps.date.outputs.today }}
+            ${{ env.GITHUB_REGISTRY }}/${{ env.GITHUB_IMAGE_NAME }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
