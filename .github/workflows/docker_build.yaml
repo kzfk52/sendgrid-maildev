@@ -12,11 +12,10 @@ env:
   GITHUB_REGISTRY: ghcr.io
   GITHUB_IMAGE_NAME: ${{ github.repository }}
   DOCKER_HUB_IMAGE_NAME: ${{ github.event.repository.name }}
-
 jobs:
   docker:
     runs-on: ubuntu-20.04
-    if: ${{ env.DOCKERHUB_TOKEN != null }}
+    if: ${{ false }}
     env:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
