@@ -18,7 +18,7 @@ env:
 jobs:
   docker:
     runs-on: ubuntu-20.04
-    if: env.DOCKERHUB_USERNAME != "" && env.DOCKERHUB_TOKEN != ""
+    if: env.DOCKERHUB_TOKEN != ""
     steps:
       # 2. setup variables
       - uses: FranzDiebold/github-env-vars-action@v2
