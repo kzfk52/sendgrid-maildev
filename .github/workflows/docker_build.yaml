@@ -12,11 +12,13 @@ env:
   GITHUB_REGISTRY: ghcr.io
   GITHUB_IMAGE_NAME: ${{ github.repository }}
   DOCKER_HUB_IMAGE_NAME: ${{ github.event.repository.name }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
   docker:
     runs-on: ubuntu-20.04
-    if: secrets.DOCKERHUB_USERNAME != "" && secrets.DOCKERHUB_TOKEN != ""
+    if: env.DOCKERHUB_USERNAME != "" && env.DOCKERHUB_TOKEN != ""
     steps:
       # 2. setup variables
       - uses: FranzDiebold/github-env-vars-action@v2
