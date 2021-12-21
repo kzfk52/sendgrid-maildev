@@ -48,3 +48,32 @@ services:
 # Example of AWS
 
 ![](https://raw.githubusercontent.com/yKanazawa/sendgrid-maildev/master/img/example_of_aws.png)
+
+# build memo
+
+```bash
+# docker desktop for windows build memo
+
+DOCKER_TAG=kzfk/sendgrid-maildev
+DOCKER_REV=1.0.0
+
+# build env create and use setting
+docker buildx create --name mybuilder --use
+
+## docker image loading only(multiple platform build is not accept '--load')
+docker buildx build --platform linux/amd64 \
+  -t ${DOCKER_TAG}:latest -t ${DOCKER_TAG}:${DOCKER_REV} \
+  --load --pull .
+docker buildx build --platform linux/arm64 \
+  -t ${DOCKER_TAG}:latest -t ${DOCKER_TAG}:${DOCKER_REV} \
+  --load --pull .
+
+## docker image direct registory push
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t ${DOCKER_TAG}:latest \
+  -t ${DOCKER_TAG}:${DOCKER_REV} \
+  --push --pull .
+
+# docker registory image inspect
+docker buildx imagetools inspect ${DOCKER_TAG}:latest
+```
